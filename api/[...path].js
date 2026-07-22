@@ -266,7 +266,11 @@ async function handle(req, res, pathname) {
 
 module.exports = async function handler(req, res) {
   try {
-    const pathParts = Array.isArray(req.query.path) ? req.query.path : [];
+    const pathParts = Array.isArray(req.query.path)
+      ? req.query.path
+      : req.query.path
+        ? [req.query.path]
+        : [];
     const pathname = `/${pathParts.join('/')}`;
     await handle(req, res, pathname);
   } catch (error) {

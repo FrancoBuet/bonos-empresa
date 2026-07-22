@@ -32,6 +32,8 @@
         </div>
       </header>
 
+      <div id="appMessage" class="message hidden" role="status"></div>
+
       <section class="metrics">
         <article><span>Empleados activos</span><strong id="statActivos">0</strong></article>
         <article><span>Bonos usados</span><strong id="statUsados">0</strong></article>
@@ -82,7 +84,7 @@
 
           <form id="importForm" class="panel form-grid">
             <h2>Importar empleados</h2>
-            <label class="wide">Lista CSV<textarea id="csv" placeholder="Juan Perez,30111222,A15&#10;Ana Gomez,28999888,A16"></textarea></label>
+            <label class="wide">Lista CSV<textarea id="csv" name="csv" placeholder="Juan Perez,30111222,A15&#10;Ana Gomez,28999888,A16"></textarea></label>
             <button type="submit">Importar lista</button>
           </form>
         </aside>

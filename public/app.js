@@ -1,7 +1,8 @@
 const state = {
   token: localStorage.getItem('bonos_token'),
   data: null,
-  soloPendientes: false
+  soloPendientes: false,
+  messageTimer: null
 };
 
 const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
@@ -13,6 +14,25 @@ function $(selector) {
 
 function formObject(form) {
   return Object.fromEntries(new FormData(form).entries());
+}
+
+function notify(message, type = 'ok') {
+  const box = $('#appMessage');
+  if (!box) return;
+  clearTimeout(state.messageTimer);
+  box.textContent = message;
+  box.className = `message ${type}`;
+  state.messageTimer = setTimeout(() => box.classList.add('hidden'), 4200);
+}
+
+function buttonBusy(button, busyText) {
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = busyText;
+  return () => {
+    button.disabled = false;
+    button.textContent = originalText;
+  };
 }
 
 function escapeHtml(value) {
@@ -109,7 +129,7 @@ function render() {
 }
 
 async function loadState() {
-  state.data = await api(`/api/state?periodo=${encodeURIComponent(period())}`);
+  state.data = await api(`/api/state?periodo=${encodeURIComponent(period())}&t=${Date.now()}`);
   render();
 }
 
@@ -190,19 +210,43 @@ $('#verTodos').addEventListener('click', () => {
 
 $('#configForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  await api('/api/config', { method: 'PUT', body: JSON.stringify(formObject(event.currentTarget)) });
-  await loadState();
+  const done = buttonBusy(event.submitter, 'Guardando...');
+  try {
+    await api('/api/config', { method: 'PUT', body: JSON.stringify(formObject(event.currentTarget)) });
+    await loadState();
+    notify('Configuracion guardada.');
+  } catch (error) {
+    notify(error.message, 'error');
+  } finally {
+    done();
+  }
 });
 
 $('#empleadoForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  await api('/api/empleados', { method: 'POST', body: JSON.stringify(formObject(event.currentTarget)) });
-  event.currentTarget.reset();
-  await loadState();
+  const form = event.currentTarget;
+  const done = buttonBusy(event.submitter, 'Agregando...');
+  try {
+    const empleado = await api('/api/empleados', { method: 'POST', body: JSON.stringify(formObject(form)) });
+    if (state.data?.empleados) {
+      state.data.empleados.push({ ...empleado, uso: null });
+      state.data.resumen.activos += 1;
+      state.data.resumen.pendientes += 1;
+      render();
+    }
+    form.reset();
+    await loadState();
+    notify('Empleado agregado.');
+  } catch (error) {
+    notify(error.message, 'error');
+  } finally {
+    done();
+  }
 });
 
 $('#importForm').addEventListener('submit', async (event) => {
   event.preventDefault();
+  const done = buttonBusy(event.submitter, 'Importando...');
   const empleados = $('#csv').value
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -211,37 +255,58 @@ $('#importForm').addEventListener('submit', async (event) => {
       const [nombre, dni, legajo] = parseCsvLine(line);
       return { nombre, dni, legajo };
     });
-  const result = await api('/api/empleados/importar', { method: 'POST', body: JSON.stringify({ empleados }) });
-  $('#csv').value = '';
-  await loadState();
-  alert(`Importados: ${result.importados}. Omitidos: ${result.omitidos}.`);
+  if (!empleados.length) {
+    notify('Pegá al menos un empleado en la lista CSV.', 'error');
+    done();
+    return;
+  }
+  try {
+    const result = await api('/api/empleados/importar', { method: 'POST', body: JSON.stringify({ empleados }) });
+    $('#csv').value = '';
+    await loadState();
+    notify(`Importados: ${result.importados}. Omitidos: ${result.omitidos}.`);
+  } catch (error) {
+    notify(error.message, 'error');
+  } finally {
+    done();
+  }
 });
 
 $('#tabla').addEventListener('click', async (event) => {
   const button = event.target.closest('button');
   if (!button) return;
-  if (button.dataset.use) {
-    await api('/api/usos', {
-      method: 'POST',
-      body: JSON.stringify({ empleadoId: button.dataset.use, periodo: period(), monto: $('#monto').value })
-    });
+  const done = buttonBusy(button, '...');
+  try {
+    if (button.dataset.use) {
+      await api('/api/usos', {
+        method: 'POST',
+        body: JSON.stringify({ empleadoId: button.dataset.use, periodo: period(), monto: $('#monto').value })
+      });
+      notify('Bono marcado como usado.');
+    }
+    if (button.dataset.undo) {
+      await api(`/api/usos/${button.dataset.undo}?periodo=${encodeURIComponent(period())}`, { method: 'DELETE' });
+      notify('Marca deshecha.');
+    }
+    if (button.dataset.active) {
+      const empleado = state.data.empleados.find((item) => item.id === button.dataset.active);
+      await api(`/api/empleados/${empleado.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          nombre: empleado.nombre,
+          dni: empleado.dni,
+          legajo: empleado.legajo,
+          activo: button.dataset.value === 'true'
+        })
+      });
+      notify(button.dataset.value === 'true' ? 'Empleado activado.' : 'Empleado dado de baja.');
+    }
+    await loadState();
+  } catch (error) {
+    notify(error.message, 'error');
+  } finally {
+    done();
   }
-  if (button.dataset.undo) {
-    await api(`/api/usos/${button.dataset.undo}?periodo=${encodeURIComponent(period())}`, { method: 'DELETE' });
-  }
-  if (button.dataset.active) {
-    const empleado = state.data.empleados.find((item) => item.id === button.dataset.active);
-    await api(`/api/empleados/${empleado.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        nombre: empleado.nombre,
-        dni: empleado.dni,
-        legajo: empleado.legajo,
-        activo: button.dataset.value === 'true'
-      })
-    });
-  }
-  await loadState();
 });
 
 $('#exportar').addEventListener('click', () => {

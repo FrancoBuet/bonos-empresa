@@ -84,8 +84,10 @@
 
           <form id="importForm" class="panel form-grid">
             <h2>Importar empleados</h2>
+            <label class="wide">Archivo CSV<input id="csvFile" type="file" accept=".csv,text/csv"></label>
             <label class="wide">Lista CSV<textarea id="csv" name="csv" placeholder="Juan Perez,30111222,A15&#10;Ana Gomez,28999888,A16"></textarea></label>
             <button type="submit">Importar lista</button>
+            <small id="importStatus" class="form-status"></small>
           </form>
         </aside>
       </section>

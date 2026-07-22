@@ -26,6 +26,7 @@ function notify(message, type = 'ok') {
 }
 
 function buttonBusy(button, busyText) {
+  if (!button) return () => {};
   const originalText = button.textContent;
   button.disabled = true;
   button.textContent = busyText;
@@ -134,6 +135,7 @@ async function loadState() {
 }
 
 function parseCsvLine(line) {
+  const delimiter = line.includes(';') ? ';' : line.includes('\t') ? '\t' : ',';
   const result = [];
   let current = '';
   let quoted = false;
@@ -144,7 +146,7 @@ function parseCsvLine(line) {
       i += 1;
     } else if (char === '"') {
       quoted = !quoted;
-    } else if (char === ',' && !quoted) {
+    } else if (char === delimiter && !quoted) {
       result.push(current.trim());
       current = '';
     } else {
@@ -153,6 +155,24 @@ function parseCsvLine(line) {
   }
   result.push(current.trim());
   return result;
+}
+
+function parseEmployeesCsv(text) {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [nombre, dni, legajo] = parseCsvLine(line);
+      return { nombre, dni, legajo };
+    });
+}
+
+function setImportStatus(message, type = 'ok') {
+  const status = $('#importStatus');
+  if (!status) return;
+  status.textContent = message;
+  status.className = `form-status ${type}`;
 }
 
 function downloadCsv(filename, rows) {
@@ -246,29 +266,41 @@ $('#empleadoForm').addEventListener('submit', async (event) => {
 
 $('#importForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  const done = buttonBusy(event.submitter, 'Importando...');
-  const empleados = $('#csv').value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [nombre, dni, legajo] = parseCsvLine(line);
-      return { nombre, dni, legajo };
-    });
+  setImportStatus('');
+  const submitButton = event.submitter || event.currentTarget.querySelector('button[type="submit"]');
+  const done = buttonBusy(submitButton, 'Importando...');
+  const empleados = parseEmployeesCsv($('#csv').value);
   if (!empleados.length) {
-    notify('Pegá al menos un empleado en la lista CSV.', 'error');
+    const message = 'Pega empleados en la lista o selecciona un archivo CSV.';
+    setImportStatus(message, 'error');
+    notify(message, 'error');
     done();
     return;
   }
   try {
     const result = await api('/api/empleados/importar', { method: 'POST', body: JSON.stringify({ empleados }) });
     $('#csv').value = '';
+    $('#csvFile').value = '';
     await loadState();
-    notify(`Importados: ${result.importados}. Omitidos: ${result.omitidos}.`);
+    const message = `Importados: ${result.importados}. Omitidos: ${result.omitidos}.`;
+    setImportStatus(message);
+    notify(message);
   } catch (error) {
+    setImportStatus(error.message, 'error');
     notify(error.message, 'error');
   } finally {
     done();
+  }
+});
+
+$('#csvFile').addEventListener('change', async (event) => {
+  const file = event.currentTarget.files?.[0];
+  if (!file) return;
+  try {
+    $('#csv').value = await file.text();
+    setImportStatus(`Archivo cargado: ${file.name}. Ahora toca Importar lista.`);
+  } catch (error) {
+    setImportStatus('No se pudo leer el archivo CSV.', 'error');
   }
 });
 

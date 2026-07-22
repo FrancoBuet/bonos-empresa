@@ -73,6 +73,15 @@ h1, h2 { margin: 0; letter-spacing: 0; }
 h1 { font-size: clamp(28px, 4vw, 42px); }
 h2 { font-size: 18px; margin-bottom: 14px; }
 small { color: var(--danger); min-height: 18px; }
+.form-status {
+  display: block;
+  color: var(--success);
+  font-weight: 700;
+  min-height: 18px;
+}
+.form-status.error {
+  color: var(--danger);
+}
 .hidden { display: none !important; }
 .eyebrow {
   margin: 0 0 6px;

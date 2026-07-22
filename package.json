@@ -1,0 +1,11 @@
+{
+  "name": "bonos-empresa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema aparte para controlar bonos mensuales de empleados.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js && node --check api/[...path].js"
+  }
+}

@@ -210,7 +210,7 @@ small { color: var(--danger); min-height: 18px; }
 }
 table {
   width: 100%;
-  min-width: 690px;
+  min-width: 620px;
   border-collapse: collapse;
   background: var(--surface);
   table-layout: fixed;
@@ -231,19 +231,17 @@ th {
   top: 0;
   z-index: 2;
 }
-th:nth-child(1), td:nth-child(1) { width: 42%; }
-th:nth-child(2), td:nth-child(2) { width: 15%; }
-th:nth-child(3), td:nth-child(3) { width: 10%; }
-th:nth-child(4), td:nth-child(4) { width: 16%; }
-th:nth-child(5), td:nth-child(5) { width: 17%; }
+th:nth-child(1), td:nth-child(1) { width: 47%; }
+th:nth-child(2), td:nth-child(2) { width: 17%; }
+th:nth-child(3), td:nth-child(3) { width: 17%; }
+th:nth-child(4), td:nth-child(4) { width: 19%; }
 td:nth-child(1) strong {
   display: block;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 td:nth-child(2),
-td:nth-child(3),
-td:nth-child(4) {
+td:nth-child(3) {
   white-space: nowrap;
 }
 tbody tr:hover { background: #f8fbff; }

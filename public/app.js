@@ -85,7 +85,7 @@ function filteredEmployees() {
   return (state.data?.empleados || []).filter((empleado) => {
     if (state.soloPendientes && (empleado.activo === false || empleado.uso)) return false;
     if (!term) return true;
-    return [empleado.nombre, empleado.dni, empleado.legajo].some((field) => String(field || '').toLowerCase().includes(term));
+    return [empleado.nombre, empleado.dni].some((field) => String(field || '').toLowerCase().includes(term));
   });
 }
 
@@ -101,7 +101,7 @@ function render() {
 
   const rows = filteredEmployees();
   if (!rows.length) {
-    $('#tabla').innerHTML = '<tr><td class="empty" colspan="5">No hay empleados para mostrar.</td></tr>';
+    $('#tabla').innerHTML = '<tr><td class="empty" colspan="4">No hay empleados para mostrar.</td></tr>';
     return;
   }
 
@@ -121,7 +121,6 @@ function render() {
       <tr>
         <td><strong>${escapeHtml(empleado.nombre)}</strong></td>
         <td>${escapeHtml(empleado.dni)}</td>
-        <td>${escapeHtml(empleado.legajo || '-')}</td>
         <td>${estado}</td>
         <td><div class="row-actions">${acciones}</div></td>
       </tr>
@@ -163,8 +162,8 @@ function parseEmployeesCsv(text) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [nombre, dni, legajo] = parseCsvLine(line);
-      return { nombre, dni, legajo };
+      const [nombre, dni] = parseCsvLine(line);
+      return { nombre, dni };
     });
 }
 
@@ -217,12 +216,11 @@ function openPdfReport() {
           <td>${index + 1}</td>
           <td>${escapeHtml(empleado.nombre)}</td>
           <td>${escapeHtml(empleado.dni)}</td>
-          <td>${escapeHtml(empleado.legajo || '-')}</td>
           <td>${formatDateOnly(empleado.uso.usadoAt)}</td>
           <td class="money">${money.format(empleado.uso.monto || data.config.montoMensual)}</td>
         </tr>
       `).join('')
-    : '<tr><td colspan="6" class="empty-print">No hay bonos usados para este periodo.</td></tr>';
+    : '<tr><td colspan="5" class="empty-print">No hay bonos usados para este periodo.</td></tr>';
   const pendientesHtml = pendientes.length
     ? pendientes.map((empleado) => `<li>${escapeHtml(empleado.nombre)} - DNI ${escapeHtml(empleado.dni)}</li>`).join('')
     : '<li>Sin pendientes.</li>';
@@ -281,7 +279,6 @@ function openPdfReport() {
               <th>#</th>
               <th>Empleado</th>
               <th>DNI</th>
-              <th>Legajo</th>
               <th>Fecha de uso</th>
               <th class="money">Monto</th>
             </tr>
@@ -289,7 +286,7 @@ function openPdfReport() {
           <tbody>
             ${rowsHtml}
             <tr class="total-row">
-              <td colspan="5">Total</td>
+              <td colspan="4">Total</td>
               <td class="money">${money.format(data.resumen.total)}</td>
             </tr>
           </tbody>

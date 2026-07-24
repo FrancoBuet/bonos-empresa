@@ -45,7 +45,7 @@
         <section class="panel">
           <h2>Buscar y marcar</h2>
           <div class="filters">
-            <input id="buscar" type="search" placeholder="Nombre, DNI o legajo">
+            <input id="buscar" type="search" placeholder="Nombre o DNI">
             <button id="soloPendientes" class="secondary">Pendientes</button>
             <button id="verTodos" class="secondary">Todos</button>
             <button id="exportarPdf" class="secondary">Exportar PDF</button>
@@ -56,7 +56,6 @@
                 <tr>
                   <th>Empleado</th>
                   <th>DNI</th>
-                  <th>Legajo</th>
                   <th>Estado</th>
                   <th>Accion</th>
                 </tr>
@@ -78,14 +77,13 @@
             <h2>Nuevo empleado</h2>
             <label>Nombre y apellido<input name="nombre" required></label>
             <label>DNI<input name="dni" required></label>
-            <label>Legajo<input name="legajo"></label>
             <button type="submit">Agregar empleado</button>
           </form>
 
           <form id="importForm" class="panel form-grid">
             <h2>Importar empleados</h2>
             <label class="wide">Archivo CSV<input id="csvFile" type="file" accept=".csv,text/csv"></label>
-            <label class="wide">Lista CSV<textarea id="csv" name="csv" placeholder="Juan Perez,30111222,A15&#10;Ana Gomez,28999888,A16"></textarea></label>
+            <label class="wide">Lista CSV<textarea id="csv" name="csv" placeholder="Juan Perez,30111222&#10;Ana Gomez,28999888"></textarea></label>
             <button type="submit">Importar lista</button>
             <small id="importStatus" class="form-status"></small>
           </form>

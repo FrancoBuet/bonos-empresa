@@ -269,9 +269,10 @@ tr:last-child td { border-bottom: 0; }
   width: 100%;
   min-width: 0;
 }
-.row-actions button[data-use],
-.row-actions button[data-undo] {
+.row-actions button:only-child {
   grid-column: 1 / -1;
+  justify-self: end;
+  width: min(100%, 120px);
 }
 .empty {
   text-align: center;

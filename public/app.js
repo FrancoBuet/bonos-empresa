@@ -236,6 +236,7 @@ function openPdfReport() {
           header { border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 18px; }
           .eyebrow { color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 6px; }
           h1 { font-size: 28px; margin: 0; }
+          .subtitle { color: #334155; font-size: 14px; font-weight: 700; margin: 4px 0 0; }
           h2 { font-size: 16px; margin: 22px 0 10px; }
           .meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 24px; margin-top: 12px; color: #334155; font-size: 13px; }
           .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
@@ -256,7 +257,8 @@ function openPdfReport() {
       <body>
         <header>
           <p class="eyebrow">Reporte mensual de bonos</p>
-          <h1>${escapeHtml(data.config.empresa)}</h1>
+          <h1>El Nono Coqui</h1>
+          <p class="subtitle">Fruteria y verduleria</p>
           <div class="meta">
             <div><strong>Periodo:</strong> ${escapeHtml(periodLabel(period()))}</div>
             <div><strong>Generado:</strong> ${escapeHtml(generatedAt)}</div>

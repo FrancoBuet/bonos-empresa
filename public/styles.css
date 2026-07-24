@@ -270,8 +270,7 @@ tr:last-child td { border-bottom: 0; }
   min-width: 0;
 }
 .row-actions button[data-use],
-.row-actions button[data-undo],
-.row-actions button[data-active]:only-child {
+.row-actions button[data-undo] {
   grid-column: 1 / -1;
 }
 .empty {

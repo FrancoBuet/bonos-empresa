@@ -113,10 +113,10 @@ function render() {
         ? `<span class="badge">Usado ${formatDateTime(empleado.uso.usadoAt)}</span>`
         : '<span class="badge warn">Pendiente</span>';
     const acciones = inactive
-      ? `<button class="secondary mini" data-active="${empleado.id}" data-value="true">Activar</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`
+      ? `<button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`
       : empleado.uso
-        ? `<button class="secondary mini" data-undo="${empleado.id}">Deshacer</button><button class="secondary mini" data-active="${empleado.id}" data-value="false">Baja</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`
-        : `<button class="mini" data-use="${empleado.id}">Marcar usado</button><button class="secondary mini" data-active="${empleado.id}" data-value="false">Baja</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`;
+        ? `<button class="secondary mini" data-undo="${empleado.id}">Deshacer</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`
+        : `<button class="mini" data-use="${empleado.id}">Marcar usado</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`;
     return `
       <tr>
         <td><strong>${escapeHtml(empleado.nombre)}</strong></td>
@@ -447,19 +447,6 @@ $('#tabla').addEventListener('click', async (event) => {
     if (button.dataset.undo) {
       await api(`/api/usos/${button.dataset.undo}?periodo=${encodeURIComponent(period())}`, { method: 'DELETE' });
       notify('Marca deshecha.');
-    }
-    if (button.dataset.active) {
-      const empleado = state.data.empleados.find((item) => item.id === button.dataset.active);
-      await api(`/api/empleados/${empleado.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          nombre: empleado.nombre,
-          dni: empleado.dni,
-          legajo: empleado.legajo,
-          activo: button.dataset.value === 'true'
-        })
-      });
-      notify(button.dataset.value === 'true' ? 'Empleado activado.' : 'Empleado dado de baja.');
     }
     if (button.dataset.delete) {
       await api(`/api/empleados/${button.dataset.delete}`, { method: 'DELETE' });

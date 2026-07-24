@@ -384,6 +384,21 @@ async function handleApi(req, res, url) {
     return send(res, 200, { ok: true });
   }
 
+  if (empleadoMatch && req.method === 'DELETE') {
+    if (USE_SUPABASE) {
+      await supabaseRequest(`bono_empleados?id=eq.${encodeURIComponent(empleadoMatch[1])}`, {
+        method: 'DELETE',
+        headers: { Prefer: 'return=minimal' }
+      });
+      return send(res, 200, { ok: true });
+    }
+    await updateData((data) => {
+      data.empleados = data.empleados.filter((empleado) => empleado.id !== empleadoMatch[1]);
+      data.usos = data.usos.filter((uso) => uso.empleadoId !== empleadoMatch[1]);
+    });
+    return send(res, 200, { ok: true });
+  }
+
   if (url.pathname === '/api/usos' && req.method === 'POST') {
     const body = await readJson(req);
     const periodo = requirePeriod(body.periodo);

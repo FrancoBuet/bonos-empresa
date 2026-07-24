@@ -113,10 +113,10 @@ function render() {
         ? `<span class="badge">Usado ${formatDateTime(empleado.uso.usadoAt)}</span>`
         : '<span class="badge warn">Pendiente</span>';
     const acciones = inactive
-      ? `<button class="secondary mini" data-active="${empleado.id}" data-value="true">Activar</button>`
+      ? `<button class="secondary mini" data-active="${empleado.id}" data-value="true">Activar</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`
       : empleado.uso
-        ? `<button class="secondary mini" data-undo="${empleado.id}">Deshacer</button><button class="secondary mini" data-active="${empleado.id}" data-value="false">Baja</button>`
-        : `<button class="mini" data-use="${empleado.id}">Marcar usado</button><button class="secondary mini" data-active="${empleado.id}" data-value="false">Baja</button>`;
+        ? `<button class="secondary mini" data-undo="${empleado.id}">Deshacer</button><button class="secondary mini" data-active="${empleado.id}" data-value="false">Baja</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`
+        : `<button class="mini" data-use="${empleado.id}">Marcar usado</button><button class="secondary mini" data-active="${empleado.id}" data-value="false">Baja</button><button class="danger mini" data-delete="${empleado.id}">Eliminar</button>`;
     return `
       <tr>
         <td><strong>${escapeHtml(empleado.nombre)}</strong></td>
@@ -432,6 +432,12 @@ $('#csvFile').addEventListener('change', async (event) => {
 $('#tabla').addEventListener('click', async (event) => {
   const button = event.target.closest('button');
   if (!button) return;
+  const empleadoParaEliminar = button.dataset.delete
+    ? state.data.empleados.find((item) => item.id === button.dataset.delete)
+    : null;
+  if (empleadoParaEliminar && !confirm(`Eliminar definitivamente a ${empleadoParaEliminar.nombre}? Tambien se borran sus marcas de bonos.`)) {
+    return;
+  }
   const done = buttonBusy(button, '...');
   try {
     if (button.dataset.use) {
@@ -457,6 +463,10 @@ $('#tabla').addEventListener('click', async (event) => {
         })
       });
       notify(button.dataset.value === 'true' ? 'Empleado activado.' : 'Empleado dado de baja.');
+    }
+    if (button.dataset.delete) {
+      await api(`/api/empleados/${button.dataset.delete}`, { method: 'DELETE' });
+      notify('Empleado eliminado de la base de datos.');
     }
     await loadState();
   } catch (error) {

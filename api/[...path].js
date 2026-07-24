@@ -230,6 +230,14 @@ async function handle(req, res, pathname) {
     return json(res, 200, { ok: true });
   }
 
+  if (empleadoMatch && req.method === 'DELETE') {
+    await supabaseRequest(`bono_empleados?id=eq.${encodeURIComponent(empleadoMatch[1])}`, {
+      method: 'DELETE',
+      headers: { Prefer: 'return=minimal' }
+    });
+    return json(res, 200, { ok: true });
+  }
+
   if (pathname === '/usos' && req.method === 'POST') {
     const body = await readBody(req);
     const periodo = requirePeriod(body.periodo);

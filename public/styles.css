@@ -43,6 +43,14 @@ button.secondary {
   color: var(--brand-dark);
   border: 1px solid #c9d8ff;
 }
+button.danger {
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+}
+button.danger:hover {
+  background: #fee2e2;
+}
 button.mini {
   min-height: 32px;
   padding: 0 10px;
